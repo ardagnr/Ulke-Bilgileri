@@ -15,7 +15,7 @@
         height: 120px;
       }
 
-      #details{
+      #details {
         opacity: 0;
       }
     </style>
@@ -54,47 +54,41 @@
     <script>
       document.querySelector("#btnSearch").addEventListener("click", () => {
         let text = document.querySelector("#txtSearch").value;
-        document.querySelector("#details").style.opacity=0;
+        document.querySelector("#details").style.opacity = 0;
         getCountry(text);
       });
 
-      function getCountry(country) {
-        fetch("https://restcountries.com/v3.1/name/" + country)
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error("ülke bulunamadı");
-            }
+      async function getCountry(country) {
+        try {
+          const response = await fetch(
+            "https://restcountries.com/v3.1/name/" + country
+          );
+          if (!response.ok) {
+            throw new Error("ülke bulunamadı");
+          }
 
-            return response.json();
-          })
-          .then((data) => {
-            renderCountry(data[0]);
-            const countries = data[0].borders;
-            if (!countries) {
-              throw new Error("komşu ülke bulunamadı.");
-            }
-            return fetch(
-              "https://restcountries.com/v3.1/alpha?codes=" +
-                countries.toString()
-            );
-          })
-          .then((response) => {
-            return response.json();
-          })
-          .then((data) => {
-            renderNeighbors(data);
-          })
-          .catch((err) => {
-            renderError(err);
-          });
+          const data = await response.json();
+          renderCountry(data[0]);
+
+          const countries = data[0].borders;
+          if (!countries) {
+            throw new Error("komşu ülke bulunamadı.");
+          }
+          const response2 = await fetch(
+            "https://restcountries.com/v3.1/alpha?codes=" + countries.toString()
+          );
+          const neighbors = await response2.json();
+          renderNeighbors(neighbors);
+        } catch (err) {
+          renderError(err);
+        }
       }
 
       function renderCountry(data) {
-
-        document.querySelector("#country-details").innerHTML="";
-        document.querySelector("#neighbors").innerHTML="";
+        document.querySelector("#country-details").innerHTML = "";
+        document.querySelector("#neighbors").innerHTML = "";
         let html = `
-        
+
             <div class="col-4">
               <img src="${data.flags.png}" alt="" class="img-fluid">
             </div>
@@ -122,9 +116,9 @@
         })</div>
               </div>
             </div>
-          
+
         `;
-        document.querySelector("#details").style.opacity=1;
+        document.querySelector("#details").style.opacity = 1;
         document.querySelector("#country-details").innerHTML = html;
       }
 
@@ -140,7 +134,7 @@
                 </div>
               </div>
             </div>
-          
+
           `;
 
           document.querySelector("#neighbors").innerHTML = html;
